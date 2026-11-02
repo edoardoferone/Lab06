@@ -1,3 +1,4 @@
+import mysql.connector
 from database.DB_connect import get_connection
 from model.strumento import Strumento
 from model.prestito import Prestito
@@ -35,7 +36,26 @@ class DepositoStrumenti:
             Funzione che legge tutti gli strumenti nel database
             :return: una lista con tutti gli strumenti presenti oppure None
         """
-        # TODO
+        cnx = get_connection()
+        if cnx is None:
+            return None
+
+        risultato = []
+        try:
+            cursor = cnx.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM strumento")
+            for row in cursor:
+                strumento = Strumento(row["codice"], row["tipo"], row["marca"],
+                                      row["anno_acquisto"], row["valore"], row["disponibile"])
+                risultato.append(strumento)
+            cursor.close()
+            cnx.close()
+        except mysql.connector.Error as err:
+            print(err)
+            cnx.close()
+            return None
+
+        return risultato
 
     def cerca_strumenti_per_tipo(self, tipo) -> list[Strumento] | None:
         """
@@ -43,4 +63,23 @@ class DepositoStrumenti:
             :param tipo: il tipo dello strumento (es. "Chitarra")
             :return: una lista con tutti gli strumenti del tipo indicato oppure None
         """
-        # TODO
+        cnx = get_connection()
+        if cnx is None:
+            return None
+
+        risultato = []
+        try:
+            cursor = cnx.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM strumento WHERE tipo = %s", (tipo,))
+            for row in cursor:
+                strumento = Strumento(row["codice"], row["tipo"], row["marca"],
+                                      row["anno_acquisto"], row["valore"], row["disponibile"])
+                risultato.append(strumento)
+            cursor.close()
+            cnx.close()
+        except mysql.connector.Error as err:
+            print(err)
+            cnx.close()
+            return None
+
+        return risultato
